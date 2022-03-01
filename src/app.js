@@ -33,6 +33,11 @@ app.post("/register",async(req,res) => {
         //hash password
         
         const token = await regEmp.generateAuthToken();
+        // res.cookie("jwt",token);
+        res.cookie("jwt",token,{
+            expires: new Date(Date.now() + 30000),
+            httpOnly: true
+        });
         const result = await regEmp.save();
         res.status(201).render("index");
     }catch(er){
@@ -48,7 +53,10 @@ app.post("/login",async(req,res) => {
         const result = await Register.findOne({email:email});
         const isMatch = await bcrypt.compare(password,result.password);
         const token = await result.generateAuthToken();
-        console.log(isMatch);
+        res.cookie("jwt",token,{
+            expires: new Date(Date.now + 30000),
+            httpOnly: true
+        });
         if(isMatch){
             res.status(201).render('index');
         }
@@ -75,6 +83,7 @@ app.post("/login",async(req,res) => {
 // securePassword("lakshya123") 
 
 const jwt = require("jsonwebtoken");
+const { connect } = require('http2');
 
 const createToken = async() => {
     const token = await jwt.sign({_id:"6218f17a1940c07aa7f5b442"}, "secretkey",{
